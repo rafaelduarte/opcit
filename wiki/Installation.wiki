@@ -1,0 +1,11 @@
+#summary Installation instructions
+#labels Phase-Deploy
+
+= Introduction =
+
+How to install opcit.
+
+
+= Prerequisites =
+
+  * Qt:
