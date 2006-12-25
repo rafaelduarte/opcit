@@ -18,7 +18,7 @@ Opcit is a python application using QT as its GUI library and either postgres or
 
 The source code only lives in the google-code subversion repository. Go to http://code.google.com/p/opcit and look at the svn tab for instructions for checking it out.
 
-= Step 2: set up the database = 
+= Step 2: set up the database =
 
 Once all the prerequisites are installed, the database has to be set up. The database schema is contained in a file called _base.sql_. To set up a database using sqlite, do the following:
 
@@ -27,7 +27,7 @@ $ sqlite3 file-to-contain-database
 sqlite> .read base.sql
 }}}
 
-= Step 3: test the setup = 
+= Step 3: test the setup =
 
 Run the test-suite:
 
