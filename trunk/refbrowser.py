@@ -15,7 +15,7 @@ class RefBrowser(QtGui.QMainWindow):
 
 
 	# the projects window
-	projectsWindow = QtGui.QDockWidget(self.tr("Projects"), self)
+	projectsWindow = QtGui.QDockWidget(self.tr("Tags "), self)
 	projectsWindow.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea |
 					    QtCore.Qt.RightDockWidgetArea)
 	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea,
