@@ -1,3 +1,18 @@
+create table opcit(
+    dbversion       integer(3) );
+
+insert into opcit values (2);
+
+create table tags (
+    tag	     	    varchar(50) not null unique primary key
+);
+
+create table tags_ref (
+    uid integer primary key autoincrement,
+    tag varchar (50) references tags(tag),
+    citekey varchar(30) references ref(citekey)
+);
+
 create  table ref (
     citekey         varchar(30) not null unique primary key,
     type            varchar(20),
@@ -47,6 +62,18 @@ create  table author(
     address         varchar(200)
     );
     
+
+CREATE VIEW refview AS
+    SELECT ref.citekey, 
+    ref."year", 
+    author.name, 
+    ref.title, 
+    ref.journal
+    FROM ref, author
+    WHERE (((ref.citekey) = (author.citekey)) AND (author.number = 0));
+
+-- anything below here are leftovers from Anton's design and not
+-- used at all at the moment.
 
 
 create  table note(
@@ -101,5 +128,3 @@ create table kw_link(
     );
 
 
-CREATE VIEW refview AS
-    SELECT ref.citekey, ref."year", author.name, ref.title, ref.journal FROM ref, author WHERE (((ref.citekey) = (author.citekey)) AND (author.number = 0));
