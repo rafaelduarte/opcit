@@ -4,6 +4,7 @@ from db_connection import DbConnection
 from bibItem import bibItem
 from bibTable import bibTable
 from bibImporter import bibImporter
+from tagsQList import tagsQList
 
 class RefBrowser(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -15,13 +16,13 @@ class RefBrowser(QtGui.QMainWindow):
 
 
 	# the projects window
-	projectsWindow = QtGui.QDockWidget(self.tr("Tags "), self)
-	projectsWindow.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea |
+	tagsWindow = QtGui.QDockWidget(self.tr("Tags "), self)
+	tagsWindow.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea |
 					    QtCore.Qt.RightDockWidgetArea)
 	self.addDockWidget(QtCore.Qt.LeftDockWidgetArea,
-			   projectsWindow)
-	projectsList = QtGui.QListWidget(projectsWindow)
-	projectsWindow.setWidget(projectsList)
+			   tagsWindow)
+	self.tagsList = tagsQList(tagsWindow, db=self.dbCon.db)
+	tagsWindow.setWidget(self.tagsList)
 	
 	# the reference Display window
 	self.refDisplayWindow = QtGui.QDockWidget(self.tr("Reference"), self)
@@ -122,6 +123,7 @@ class RefBrowser(QtGui.QMainWindow):
 	PubMedMenu.addAction(self.PMIDAct)
 
 	self.menuBar().addMenu(self.refView.refMenu)
+        self.menuBar().addMenu(self.tagsList.tagsMenu)
 
 
 

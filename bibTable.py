@@ -201,6 +201,9 @@ class bibTable(QtGui.QTableView):
 	returning just unique results.
 	"""
 
+        # clear selection array
+        self.selection = bibArray()
+        
 	if searchText.isEmpty():
 	    self.currentQuery = self.defaultQuery
 	else:
@@ -241,3 +244,35 @@ class bibTable(QtGui.QTableView):
     def contextMenuEvent(self, event):
 	""" executed on right-click anywhere """
 	self.refMenu.exec_(event.globalPos())
+
+    def mousePressEvent(self, event):
+        """ for dragging and dropping """
+        if (event.button() == QtCore.Qt.LeftButton):
+            print "Left button pressed"
+            # line below fails due to pythons copy by reference mechanism
+            #self.dragStartPosition = event.pos()
+            self.dragStartPosition = QtCore.QPoint(event.pos().x(), event.pos().y())
+
+        # handle normal events
+        QtGui.QTableView.mousePressEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        """ for dragging and dropping """
+        if event.buttons() & QtCore.Qt.LeftButton:
+            print "yup"
+            print QtGui.QApplication.startDragDistance()
+            print self.dragStartPosition.x()
+            print event.pos().x()
+            if QtCore.QPoint(event.pos() - self.dragStartPosition).manhattanLength() > QtGui.QApplication.startDragDistance():
+                print "not so nyuck"
+                drag = QtGui.QDrag(self)
+                mimeData = QtCore.QMimeData()
+                mimeData.setData("text/citekeys", self.selection.getCitekeys())
+                drag.setMimeData(mimeData)
+                drag.start()
+
+                
+        print "Nyuck"
+        #QtGui.QTableView.mouseMoveEvent(self, event)
+        
+            

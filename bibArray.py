@@ -76,6 +76,20 @@ class bibArray(list):
 
         return(s)
 
+    def getCitekeys(self):
+        """returns a string list of comma separated citekeys"""
+        s = ""
+        if len(self) > 1:
+            citekeys = []
+            for ref in self:
+                citekeys.append(ref["citekey"])
+                
+            s = ", ".join(citekeys)
+        else:
+            s = self[0]["citekey"]
+
+        return(s)
+
     def getInTextCitations(self):
 	cites = []
 	for i in self:

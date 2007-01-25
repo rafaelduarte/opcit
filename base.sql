@@ -1,5 +1,5 @@
 create table opcit(
-    dbversion       integer(3) );
+    dbversion       integer );
 
 insert into opcit values (2);
 
@@ -8,7 +8,7 @@ create table tags (
 );
 
 create table tags_ref (
-    uid integer primary key autoincrement,
+    uid serial primary key,
     tag varchar (50) references tags(tag),
     citekey varchar(30) references ref(citekey)
 );

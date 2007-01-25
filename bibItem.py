@@ -325,6 +325,19 @@ class bibItem(dict):
 	    if not self[k]:
 		raise insufficientDataException(k)
 
+    def addToTag(self, tagName):
+        """add this reference to a particular tag"""
+
+        if not self["citekey"]:
+            raise insufficientDataException("citekey")
+
+        # TODO: add check to create tag if it does not exist?
+        query = QtSql.QSqlQuery()
+        query.prepare(QtCore.QString("INSERT INTO tags_ref (tag, citekey) VALUES (?, ?)"))
+        query.bindValue(0, QtCore.QVariant(tagName))
+        query.bindValue(1, QtCore.QVariant(self["citekey"]))
+        query.exec_()
+
     def insertIntoDB(self):
 	""" Insert the current bibEntry into the database """
 
