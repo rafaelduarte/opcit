@@ -57,6 +57,8 @@ class RefBrowser(QtGui.QMainWindow):
 		     self.formatCitation)
 	self.connect(self.searchEdit, QtCore.SIGNAL("returnPressed()"),
 		     self.searchDB)
+        self.connect(self.tagsList, QtCore.SIGNAL("tagSelected(QString)"),
+                     self.refView.limitByTag)
 
     def setupDbConnection(self):
 	""" takes care of connection to database and sets up model-view """

@@ -211,6 +211,16 @@ class bibTable(QtGui.QTableView):
 	self.model.setQuery("%s;" % self.currentQuery)
 
 
+    def limitByTag(self, tag):
+        """limits the viewed references to a specified tag"""
+
+        # clear selection array
+        self.selection = bibArray()
+
+        self.currentQuery = "SELECT DISTINCT refview.* FROM REFVIEW INNER JOIN tags_ref ON refview.citekey = tags_ref.citekey WHERE tags_ref.tag = '%s'" % str(tag)
+        print self.currentQuery
+        self.model.setQuery("%s;" % self.currentQuery)
+
     def exportCitations(self):
         """exports bibArray to MODS xml file"""
         # should put file selector here
