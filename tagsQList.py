@@ -53,17 +53,29 @@ class tagsQList(QtGui.QListView):
         #self.model = QtSql.QSqlQueryModel(self)
         self.model = tagsListModel(self)
 	self.defaultQuery = "SELECT tag FROM tags"
-	currentQuery = "%s;" % self.defaultQuery
-	self.model.setQuery(self.defaultQuery)
-	print "Number of tags: %i" % self.model.rowCount()
-        self.setModel(self.model)
-
+	self.currentQuery = "%s;" % self.defaultQuery
+        self.queryDB()
+        
         # create menus and actions
         self.createActions()
         self.createMenus()
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
+
+        self.connect(self, QtCore.SIGNAL("clicked(QModelIndex)"),
+                     self.tagClicked)
+
+    def queryDB(self):
+        """gets the list of tags from the DB and displays them"""
+	self.model.setQuery(self.currentQuery)
+	print "Number of tags: %i" % self.model.rowCount()
+        self.setModel(self.model)
+
+    def tagClicked(self, modelIndex):
+        """receives the clicked signal and translates it to a string"""
+        tag = self.model.data(modelIndex).toString()
+        self.emit(QtCore.SIGNAL("tagSelected(QString)"), tag)
 
     def dragMoveEvent(self, event):
         """highlight the tag the mouse is hovering over when dragging"""
@@ -83,6 +95,7 @@ class tagsQList(QtGui.QListView):
             query.prepare(QtCore.QString("INSERT INTO tags (tag) VALUES (?)"))
             query.bindValue(0, QtCore.QVariant(tagName))
             query.exec_()
+            self.queryDB()
 
     def deleteTag(self):
         # do nothing
@@ -98,11 +111,14 @@ class tagsQList(QtGui.QListView):
 	self.connect(self.newAct, QtCore.SIGNAL("triggered()"),
 		     self.newTag)
 	self.deleteAct = QtGui.QAction("Delete", self)
+        self.deleteAct.setEnabled(False)
 	self.connect(self.deleteAct, QtCore.SIGNAL("triggered()"),
 		     self.deleteTag)
 	self.editAct = QtGui.QAction("Edit", self)
+        self.editAct.setEnabled(False)
 	self.connect(self.editAct, QtCore.SIGNAL("triggered()"),
 		     self.editTag)
+
 
     def createMenus(self):
 	# the menu bar
@@ -115,15 +131,15 @@ class tagsQList(QtGui.QListView):
         """for drag and drop"""
         if event.mimeData().hasFormat("text/citekeys"):
             event.acceptProposedAction()
-            print "nyuck nyuck"
+            #print "nyuck nyuck"
         else:
-            print "ignoring nyuck"
+            #print "ignoring nyuck"
             event.ignore()
         #QtGui.QListView.dragEnterEvent(self, event)
 
     def dropEvent(self, event):
         """for drag and drop"""
-        print "got a nyuck"
+        #print "got a nyuck"
         dropIndex = self.indexAt(event.pos())
 
         if dropIndex.isValid():
