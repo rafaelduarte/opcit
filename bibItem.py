@@ -106,6 +106,7 @@ class bibItem(dict):
 	self.ui.pagesEdit.insert(self["pages"])
 	self.ui.yearEdit.insert(self["year"])
 	self.ui.collectionTitleEdit.insertPlainText(self["booktitle"])
+        self.ui.abstractEdit.insertPlainText(self["abstract"])
 
 	for editor in self["editors"]:
 	    self.ui.editorsEdit.insertPlainText("%s\n" % editor)
@@ -163,6 +164,7 @@ class bibItem(dict):
 	self["type"] = self.ui.typeBox.currentText()
 	self["year"] = self.ui.yearEdit.text()
 	self["booktitle"] = self.ui.collectionTitleEdit.toPlainText()
+        self["abstract"] = self.ui.abstractEdit.toPlainText()
 	if self["type"] == "collection":
 	    self["publisher"] = self.ui.journalEdit.text()
 	else:
@@ -206,7 +208,7 @@ class bibItem(dict):
 
 	# get rest of the fields.
 	self["citekey"] = key
-	query = QtSql.QSqlQuery("SELECT year,title,journal,volume,number,pages,publisher,booktitle,type FROM ref WHERE citekey = '%s'" % key)
+	query = QtSql.QSqlQuery("SELECT year,title,journal,volume,number,pages,publisher,booktitle,type,abstract FROM ref WHERE citekey = '%s'" % key)
 	query.exec_()
 	query.next()
 	
@@ -220,6 +222,7 @@ class bibItem(dict):
 	self["publisher"] = str(query.value(6).toString())
 	self["booktitle"] = str(query.value(7).toString())
 	self["type"] = str(query.value(8).toString())
+        self["abstract"] = str(query.value(9).toString())
 
     def getAuthorLastName(self, author):
         """return just the last name of given author"""
@@ -275,13 +278,14 @@ class bibItem(dict):
 						      self["publisher"])
 
 	else:
-	    s = "%s. (%s) %s. %s. %s:%s %s" % (self["formattedAuthors"], 
-					       self["year"], 
-					       self["title"],
-					       self["journal"], 
-					       self["volume"],
-					       self["number"],
-					       self["pages"])
+	    s = "%s. (%s) %s. %s. %s:%s %s\n\n%s" % (self["formattedAuthors"], 
+                                                     self["year"], 
+                                                     self["title"],
+                                                     self["journal"], 
+                                                     self["volume"],
+                                                     self["number"],
+                                                     self["pages"],
+                                                     self["abstract"])
 	    
 	# remove duplicate periods
 	p = re.compile('\.{2,}')
@@ -313,6 +317,9 @@ class bibItem(dict):
 	query.prepare(QtCore.QString("DELETE FROM author WHERE citekey = ?"))
 	query.bindValue(0, QtCore.QVariant(self["citekey"]))
 	query.exec_()
+        query.prepare(QtCore.QString("DELETE FROM tags_ref WHERE citekey = ?"))
+        query.bindValue(0, QtCore.QVariant(self["citekey"]))
+        query.exec_()
 	query.prepare(QtCore.QString("DELETE FROM ref WHERE citekey = ?"))
 	query.bindValue(0, QtCore.QVariant(self["citekey"]))
 	query.exec_()
@@ -345,7 +352,7 @@ class bibItem(dict):
 	self.db.transaction()
 	# type specific sanity checks should go here
 	query = QtSql.QSqlQuery()
-	query.prepare(QtCore.QString("INSERT INTO ref (citekey, type, title, journal, volume, number, pages, publisher, booktitle, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
+	query.prepare(QtCore.QString("INSERT INTO ref (citekey, type, title, journal, volume, number, pages, publisher, booktitle, year, abstract) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
 
         print "before binding of values"
 	query.bindValue(0, QtCore.QVariant(self["citekey"]))
@@ -363,6 +370,8 @@ class bibItem(dict):
 	if self["booktitle"]:
 	    query.bindValue(8, QtCore.QVariant(self["booktitle"]))
 	query.bindValue(9, QtCore.QVariant(self["year"]))
+        if self["abstract"]:
+            query.bindValue(10, QtCore.QVariant(self["abstract"]))
         print "after binding of values"
 
 	print "query was: %s" % query
