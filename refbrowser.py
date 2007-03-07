@@ -5,6 +5,7 @@ from bibItem import bibItem
 from bibTable import bibTable
 from bibImporter import bibImporter
 from tagsQList import tagsQList
+from notesViewer import notesViewer
 
 class RefBrowser(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -13,6 +14,8 @@ class RefBrowser(QtGui.QMainWindow):
 	# holds the currently selected reference
 	#self.reference = None
 	self.setupDbConnection()
+
+        self.notesView = notesViewer()
 
 
 	# the projects window
@@ -59,6 +62,8 @@ class RefBrowser(QtGui.QMainWindow):
 		     self.searchDB)
         self.connect(self.tagsList, QtCore.SIGNAL("tagSelected(QString)"),
                      self.refView.limitByTag)
+        self.connect(self.refView, QtCore.SIGNAL("selectionChanged"),
+                     self.notesView.newSelection)
 
     def setupDbConnection(self):
 	""" takes care of connection to database and sets up model-view """
@@ -114,6 +119,13 @@ class RefBrowser(QtGui.QMainWindow):
 	self.PMIDAct = QtGui.QAction("Import PMID", self)
 	self.connect(self.PMIDAct, QtCore.SIGNAL("triggered()"),
 		     self.importPMID)
+
+        self.noteAct = QtGui.QAction("Show Notes", self)
+        self.connect(self.noteAct, QtCore.SIGNAL("triggered()"),
+                     self.showNotes)
+
+    def showNotes(self):
+        self.notesView.setVisible(True)
     
     def createMenus(self):
         """ create the menu bar for the main application/popups """
@@ -127,6 +139,8 @@ class RefBrowser(QtGui.QMainWindow):
 	self.menuBar().addMenu(self.refView.refMenu)
         self.menuBar().addMenu(self.tagsList.tagsMenu)
 
+        NotesMenu = self.menuBar().addMenu("Notes")
+        NotesMenu.addAction(self.noteAct)
 
 
 if __name__ == "__main__":
