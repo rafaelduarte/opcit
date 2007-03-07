@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 
             else:
                 if lines[j] and note:
-                    note = note + " " + lines[j]
+                    note = note + "\n" + lines[j]
         #print "Previous note: [%s]: %s\n\n" % (currentRef, note)
         insertNote(currentRef, note)
 

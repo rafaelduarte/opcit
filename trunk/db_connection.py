@@ -23,8 +23,8 @@ class DbConnection(QtGui.QDialog, Ui_dbConnectionDialog):
 	
 	# Set up the user interface from designer
 	self.setupUi(self)
-	self.dbDriver.addItem("QSQLITE")
 	self.dbDriver.addItem("QPSQL")
+	self.dbDriver.addItem("QSQLITE")
 	self.setModal(1)
 	self.exec_()
 	

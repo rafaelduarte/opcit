@@ -96,6 +96,9 @@ class bibTable(QtGui.QTableView):
         for key in deselectedKeys.keys():
             self.selection.removeCitekey(key)
 
+        # send a list of all the selected citekeys
+        self.emit(QtCore.SIGNAL("selectionChanged"), self.selection)
+
         # send a string of the full citations to anyone who cares
         self.emit(QtCore.SIGNAL("referenceChanged(QString)"),
                   QtCore.QString(self.selection.getFullCitations()))
