@@ -1,43 +1,12 @@
 from PyQt4 import QtCore, QtGui, QtSql
 from bibItem import *
 
-class SpinBoxDelegate(QtGui.QItemDelegate):
-    def __init__(self, parent = None):
-        QtGui.QItemDelegate.__init__(self, parent)
-        print "constructor"
-        
-#     def createEditor(self, parent, option, index):
-#         editor = QtGui.QTextEdit(parent)
-#         #editor.setMinimum(0)
-#         #editor.setMaximum(100)
-#         editor.installEventFilter(self)
-#         print "editor"
-#         return editor
-
-#     def setEditorData(self, spinBox, index):
-#         #value, ok = index.model().data(index, QtCore.Qt.DisplayRole).toInt()
-#         print "setEditorData"
-#         spinBox.setValue("blah")
-        
-
-#     def setModelData(self, spinBox, model, index):
-#         print "setModelData"
-# #        spinBox.interpretText()
-# #        value = spinBox.value()
-
-#         #model.setData(index, QtCore.QVariant(value))
-        
-#     def updateEditorGeometry(self, editor, option, index):
-#         print "geometry"
-#         editor.setGeometry(option.rect)
-
-
 class notesTable(QtGui.QTableView):
     def __init__(self, parent=None):
         QtGui.QTableView.__init__(self, parent)
 
         # default display options
-	#self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+	self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 	self.setAlternatingRowColors(True)
 	#self.setShowGrid(False)
 
@@ -49,8 +18,36 @@ class notesTable(QtGui.QTableView):
 
         self.setupConnection()
 
+        self.note = ""
 
-    def setSelection(self, selection=""):
+	sm = self.selectionModel()
+	# signal slot connections
+        self.connect(sm,
+                     QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"),
+                     self.newSelection)
+
+    def newSelection(self, selected, deselected):
+        record = self.model.record(selected.indexes()[0].row())
+        recordCitation = str(record.value(0).toString())
+        recordNote = str(record.value(1).toString())
+
+        print "inside new selection"
+        # check to see if note ends with a period
+        periodRE = re.compile(r'\.$')
+
+        if periodRE.search(recordNote):
+            print "match found"
+            recordNote = periodRE.sub('', recordNote)
+
+        newlineRE = re.compile(r'\n')
+        recordNote = newlineRE.sub(' ', recordNote)
+            
+        self.note = "%s {%s}." % (recordNote, recordCitation)
+
+
+        
+
+    def setNoteSelection(self, selection=""):
         self.model.setFilter(selection)
         self.model.select()
         self.resizeColumnsToContents()
@@ -78,7 +75,7 @@ class notesTable(QtGui.QTableView):
 	# this allows for non-sql based sorting
 	self.filterModel.setSourceModel(self.model)
 	self.setModel(self.filterModel)
-        self.setSelection()
+        self.setNoteSelection()
         #t = QtGui.QLabel()
         #index = self.model.index(1,1, QtCore.QModelIndex())
         #self.setIndexWidget(index, t)
@@ -86,6 +83,37 @@ class notesTable(QtGui.QTableView):
         #print delegate
         #self.setItemDelegate(delegate)
 
+    def mousePressEvent(self, event):
+        """ for dragging and dropping """
+        if (event.button() == QtCore.Qt.LeftButton):
+            print "Left button pressed"
+            # line below fails due to pythons copy by reference mechanism
+            #self.dragStartPosition = event.pos()
+            self.dragStartPosition = QtCore.QPoint(event.pos().x(),
+                                                   event.pos().y())
+
+        # handle normal events
+        QtGui.QTableView.mousePressEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        """ for dragging and dropping """
+        if event.buttons() & QtCore.Qt.LeftButton:
+            print "yup"
+            print QtGui.QApplication.startDragDistance()
+            print self.dragStartPosition.x()
+            print event.pos().x()
+            if QtCore.QPoint(event.pos() - self.dragStartPosition).manhattanLength() > QtGui.QApplication.startDragDistance():
+                print "not so nyuck"
+                
+                drag = QtGui.QDrag(self)
+                mimeData = QtCore.QMimeData()
+                mimeData.setData("text/plain", self.note)
+                drag.setMimeData(mimeData)
+                drag.start()
+
+                
+        print "Nyuck"
+        #QtGui.QTableView.mouseMoveEvent(self, event)
 
 
 class notesViewer(QtGui.QDialog):
@@ -100,6 +128,7 @@ class notesViewer(QtGui.QDialog):
 
         self.setLayout(self.mainLayout)
         self.setWindowTitle("Notes")
+        self.resize(700,400)
 
     def newSelection(self, selection):
         print "inside newSelection"
@@ -111,4 +140,4 @@ class notesViewer(QtGui.QDialog):
 
         selectStatement = " OR ".join(citekeys)
         print selectStatement
-        self.notesTable.setSelection(selectStatement)
+        self.notesTable.setNoteSelection(selectStatement)
