@@ -1,6 +1,14 @@
 from bibItem import bibItem
 import sys
 
+def refSorter(x, y):
+    xstring = "%s%s%s%s" % (x["authors"][0], x["year"], "".join(x["authors"]), 
+			    x["title"])
+    ystring = "%s%s%s%s" % (y["authors"][0], y["year"], "".join(y["authors"]), 
+			    y["title"])
+
+    print "comparing %s to %s" % (xstring, ystring)
+    return(cmp(xstring,ystring))
 
 class bibArray(list):
     """ Holds an array of bibItems and provides various sorting methods """
@@ -29,7 +37,8 @@ class bibArray(list):
             if self[i]["citekey"] == key:
                 self.pop(i)
                 break
-        
+
+
 
     def modifyDuplicates(self):
         """modifies references that have duplicate in-text citations.
@@ -40,7 +49,7 @@ class bibArray(list):
         # use ascii codes to add letters
         ascii_offset = 97
 
-        self.sort()
+        self.sort(refSorter)
         listCopy = self[:]
         current_offset = 0
         for i in range(1, len(self)):

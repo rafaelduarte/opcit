@@ -1,6 +1,6 @@
 from db_connection import DbConnection
 from bibItem import bibItem, invalidDBKeyException
-from bibArray import bibArray
+from bibArray import bibArray, refSorter
 from PyQt4 import QtCore, QtGui, QtSql
 from optparse import OptionParser
 import sys
@@ -8,6 +8,56 @@ import re
 import tempfile
 import shutil
 import os
+
+def neurobiolDisease(ref):
+    """ formats the bibliography in neurobiology of disease style """
+
+    print "inside neurobiolDisease"
+
+    ref["formattedAuthors"] = ""
+    ref["formattedEditors"] = ""
+
+    for a in ref["authors"]:
+	names = a.split(" ")
+	names[len(names)-2] += ","
+	names[len(names)-1] = ".".join(names[len(names)-1])
+	names[len(names)-1] += ".,"
+	a = " ".join(names)
+	ref["formattedAuthors"] += " %s" % a
+	
+
+    #ref["formattedAuthors"] = ", ".join(ref["authors"])
+    ref["formattedEditors"] = ", ".join(ref["editors"])
+    
+    if ref["type"] == "book":
+	s = "%s %s. %s. %s." % (ref["formattedAuthors"],
+				 ref["year"],
+				 ref["title"],
+				 ref["publisher"])
+    elif ref["type"] == "collection":
+	s = "%s %s. %s in %s, %s (eds). %s." % (ref["formattedAuthors"],
+						 ref["year"],
+						 ref["title"],
+						 ref["booktitle"],
+						 ref["formattedEditors"],
+						 ref["publisher"])
+	
+    else:
+	s = "%s %s. %s. %s. %s:%s %s" % (ref["formattedAuthors"], 
+					  ref["year"], 
+					  ref["title"],
+					  ref["journal"], 
+					  ref["volume"],
+					  ref["number"],
+					  ref["pages"])
+
+	
+    # remove duplicate periods
+    p = re.compile('\.{2,}')
+    s = p.sub('.', s)
+    return s
+
+
 
 class documentFormatter:
     """ base class for formatting bibliographies """
@@ -71,7 +121,7 @@ class documentFormatter:
 		    self.references.append(b)
 
 	if self.sortRefs == True:
-	    self.references.sort()
+	    self.references.sort(refSorter)
 	self.references.changeInTextCounts()
 	print "Citations: %s" % self.references.getInTextCitations()
         self.formatReferences()
@@ -86,7 +136,7 @@ class documentFormatter:
 
     def formatReferences(self):
 	""" creates dict of formatted in text references """
-        #self.references.modifyDuplicates()
+        self.references.modifyDuplicates()
         for k in self.inTextRefs.keys():
             formatted = ""
             formattedRefs = []
@@ -230,9 +280,9 @@ class ooFormatter(documentFormatter):
         counter = 1
         for r in self.references:
 	    if self.style == "numbered":
-		self.formattedBibliography += "<text:p text:style-name=\"Standard\">[%s] %s</text:p>" % (counter , r)
+		self.formattedBibliography += "<text:p text:style-name=\"Standard\">[%s] %s</text:p>" % (counter , neurobiolDisease(r))
 	    else:
-		self.formattedBibliography += "<text:p text:style-name=\"Standard\">%s</text:p>" % r
+		self.formattedBibliography += "<text:p text:style-name=\"Standard\">%s</text:p>" % neurobiolDisease(r)
             counter += 1
 
         documentEnd = r'(</office:text>)?</office:body></office:document-content>'

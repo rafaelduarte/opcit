@@ -112,20 +112,6 @@ class bibTable(QtGui.QTableView):
         print "SELECTED: %s" % selectedKeys.keys()
         print "DESELECTED: %s" % deselectedKeys.keys()
         
-#     def newSelection(self, modelIndex):
-# 	""" loads a new bibItem """
-#         indices = self.selectionModel().selectedIndexes()
-
-#         index = self.filterModel.mapToSource(modelIndex)
-# 	key = self.model.record(index.row()).value(0).toString()
-#         print "index: %s" % index.row()
-# 	self.reference = bibItem(key, db=self.db)
-# 	print "Key is: %s" % key
-# 	print "Citation: %s" % self.reference.citation()
-# 	print "before emit"
-# 	self.emit(QtCore.SIGNAL("referenceChanged(QString)"), 
-# 		  QtCore.QString(self.reference.citation()))
-
     def sortByColumn(self, headerIndex):
 	""" uses the proxy filter to sort the view by column """
 	self.header.setSortIndicatorShown(1)
