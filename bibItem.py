@@ -547,17 +547,27 @@ class bibItem(dict):
 
         if self["pages"]:
             pages = self["pages"].split("-")
-            extent = xmlfile.createElementNS(None, "extent")
-            extent.setAttributeNS(None, "unit", "page")
-            start = xmlfile.createElementNS(None, "start")
-            startText = xmlfile.createTextNode(pages[0])
-            start.appendChild(startText)
-            extent.appendChild(start)
-            end = xmlfile.createElementNS(None, "end")
-            endText = xmlfile.createTextNode(pages[1])
-            end.appendChild(endText)
-            extent.appendChild(end)
-            part.appendChild(extent)
+	    if len(pages) >1:
+		extent = xmlfile.createElementNS(None, "extent")
+		extent.setAttributeNS(None, "unit", "page")
+		start = xmlfile.createElementNS(None, "start")
+		startText = xmlfile.createTextNode(pages[0])
+		start.appendChild(startText)
+		extent.appendChild(start)
+		end = xmlfile.createElementNS(None, "end")
+		endText = xmlfile.createTextNode(pages[1])
+		end.appendChild(endText)
+		extent.appendChild(end)
+		part.appendChild(extent)
+	    else:
+		pageDetail = xmlfile.createElementNS(None, "detail")
+		pageDetail.setAttributeNS(None, "type", "page")
+		number = xmlfile.createElementNS(None, "number")
+		numberText = xmlfile.createTextNode(pages[0])
+		number.appendChild(numberText)
+		pageDetail.appendChild(number)
+		part.appendChild(pageDetail)
+		
 
         element.appendChild(part)
         return(element)
