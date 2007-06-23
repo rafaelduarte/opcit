@@ -41,9 +41,9 @@
       <widget class="QLineEdit" name="citekeyEdit" />
      </item>
      <item>
-      <widget class="QPushButton" name="generateKeyButton_2" >
+      <widget class="QPushButton" name="editTagsButton" >
        <property name="text" >
-        <string>Generate Citekey</string>
+        <string>Edit Tags</string>
        </property>
       </widget>
      </item>
@@ -432,7 +432,7 @@
   <tabstop>abstractEdit</tabstop>
   <tabstop>submitButton</tabstop>
   <tabstop>cancelButton</tabstop>
-  <tabstop>generateKeyButton_2</tabstop>
+  <tabstop>editTagsButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

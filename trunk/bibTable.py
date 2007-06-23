@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from PyQt4 import QtCore, QtGui, QtSql
 from bibItem import bibItem
 from bibArray import bibArray
@@ -213,9 +213,29 @@ class bibTable(QtGui.QTableView):
     def exportCitations(self):
         """exports bibArray to MODS xml file"""
         # should put file selector here
-        print "Exporting to exported.xml"
         io = bibImporter()
-        io.exportXML(self.selection, "exported.xml")
+
+	fd = QtGui.QFileDialog(self, "Save As:")
+	fd.setFileMode(QtGui.QFileDialog.AnyFile)
+	fd.setFilter( "XML Files (*.xml)" )
+
+	file = None
+	if fd.exec_():
+	    fl = fd.selectedFiles()
+	    file = fl[0]
+
+	if file:
+	    overwrite = 0 #0 since messagebox return 0 on yes
+	    if os.path.exists(file):
+		overwrite = QtGui.QMessageBox.question(self, "Overwrite File?", "A file called %s already exists. Do you want to overwrite it?" % file, "&Yes", "&No", "", 0, 1)
+		print "OVERWRITE: %s" % overwrite
+	    if overwrite == 0:
+		print "Exporting to %s" % (file)
+		io.exportXML(self.selection, file)
+	    else:
+		print "Export aborted - file exists"
+	else:
+	    print "Export citations aborted"
 
     def createActions(self):
 	""" menu action to work on references """
