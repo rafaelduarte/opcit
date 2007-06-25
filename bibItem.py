@@ -352,7 +352,7 @@ class bibItem(dict):
 	self.db.transaction()
 	# type specific sanity checks should go here
 	query = QtSql.QSqlQuery()
-	query.prepare(QtCore.QString("INSERT INTO ref (citekey, type, title, journal, volume, number, pages, publisher, booktitle, year, abstract) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
+	query.prepare(QtCore.QString("INSERT INTO ref (citekey, type, title, journal, volume, number, pages, publisher, booktitle, abstract, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"))
 
         print "before binding of values"
 	query.bindValue(0, QtCore.QVariant(self["citekey"]))
@@ -369,13 +369,13 @@ class bibItem(dict):
 	    query.bindValue(7, QtCore.QVariant(self["publisher"]))
 	if self["booktitle"]:
 	    query.bindValue(8, QtCore.QVariant(self["booktitle"]))
-	query.bindValue(9, QtCore.QVariant(self["year"]))
         if self["abstract"]:
-            query.bindValue(10, QtCore.QVariant(self["abstract"]))
+            query.bindValue(9, QtCore.QVariant(self["abstract"]))
+	query.bindValue(10, QtCore.QVariant(self["year"]))
         print "after binding of values"
 
-	print "query was: %s" % query
 	if not query.exec_():
+	    print "query was: %s" % query.executedQuery()
 	    self.db.rollback() #end the transaction
 	    print "ERROR WAS: %s" % query.lastError().text()
 	    if query.lastError().type() == QtSql.QSqlError.StatementError or query.lastError().type() == QtSql.QSqlError.ConnectionError:
