@@ -108,8 +108,18 @@ class RefBrowser(QtGui.QMainWindow):
 	ref.buildEntryFromPMID(PMID)
 	ref.guiEdit()
 
+    def quit(self):
+        """ exit the program """
+        sys.exit()
+
     def createActions(self):
         """ create the actions to be used by the menus """
+
+        self.quitAct = QtGui.QAction("&Quit", self)
+        self.quitAct.setShortcut("Ctrl+Q")
+        self.connect(self.quitAct, QtCore.SIGNAL("triggered()"),
+                     self.quit)
+        
 	self.importAct = QtGui.QAction("&Import file", self)
 	self.importAct.setShortcut("Ctrl+I")
 	self.importAct.setEnabled(True)
@@ -132,6 +142,7 @@ class RefBrowser(QtGui.QMainWindow):
 	# the menu bar
 	fileMenu = self.menuBar().addMenu("&File")
 	fileMenu.addAction(self.importAct)
+        fileMenu.addAction(self.quitAct)
 
 	PubMedMenu = self.menuBar().addMenu("PubMed")
 	PubMedMenu.addAction(self.PMIDAct)
