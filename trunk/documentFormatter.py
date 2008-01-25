@@ -9,6 +9,55 @@ import tempfile
 import shutil
 import os
 
+
+def natureNeuroscience(ref):
+    """ formats the bibliography in nature neuroscience style """
+
+    print "inside neurobiolDisease"
+
+    ref["formattedAuthors"] = ""
+    ref["formattedEditors"] = ""
+
+    for a in ref["authors"]:
+	names = a.split(" ")
+	names[len(names)-2] += ","
+	names[len(names)-1] = ".".join(names[len(names)-1])
+	names[len(names)-1] += ".,"
+	a = " ".join(names)
+	ref["formattedAuthors"] += " %s" % a
+	
+
+    #ref["formattedAuthors"] = ", ".join(ref["authors"])
+    ref["formattedEditors"] = ", ".join(ref["editors"])
+    
+    if ref["type"] == "book":
+	s = "%s %s. %s. %s." % (ref["formattedAuthors"],
+				 ref["year"],
+				 ref["title"],
+				 ref["publisher"])
+    elif ref["type"] == "collection":
+	s = "%s %s. %s in %s, %s (eds). %s." % (ref["formattedAuthors"],
+						 ref["title"],
+						 ref["booktitle"],
+						 ref["formattedEditors"],
+						 ref["publisher"],
+						 ref["year"])
+
+	
+    else:
+	s = '%s. <text:span text:style-name="title">%s</text:span>. <text:span text:style-name="journal">%s</text:span>. <text:span text:style-name="volume">%s</text:span>, %s, (%s).' % (ref["formattedAuthors"], 
+					  ref["title"],
+					  ref["journal"], 
+					  ref["volume"],
+					  ref["pages"], ref["year"])
+
+	
+    # remove duplicate periods
+    p = re.compile('\.{2,}')
+    s = p.sub('.', s)
+    return s
+    
+
 def neurobiolDisease(ref):
     """ formats the bibliography in neurobiology of disease style """
 
@@ -57,7 +106,7 @@ def neurobiolDisease(ref):
     s = p.sub('.', s)
     return s
 
-
+currentFormat = natureNeuroscience
 
 class documentFormatter:
     """ base class for formatting bibliographies """
@@ -119,14 +168,15 @@ class documentFormatter:
 		if key:
 		    print "Inserting key %s" % key
 		    self.references.append(b)
+                    print "CITATION: %s" % self.references.inTextCitation(b["citekey"])
 
 	if self.sortRefs == True:
 	    self.references.sort(refSorter)
-	self.references.changeInTextCounts()
+        self.references.changeInTextCounts()
 	print "Citations: %s" % self.references.getInTextCitations()
         self.formatReferences()
 	for i in self.references: print i
-        print self.inTextRefs
+        print "IN TEXT REFS %s" % self.inTextRefs
         
     def printMissingRefs(self):
         """ prints a list of missing references to the screen """
@@ -136,7 +186,8 @@ class documentFormatter:
 
     def formatReferences(self):
 	""" creates dict of formatted in text references """
-        self.references.modifyDuplicates()
+        if self.style == "parenthetical":
+            self.references.modifyDuplicates()
         for k in self.inTextRefs.keys():
             formatted = ""
             formattedRefs = []
@@ -147,7 +198,9 @@ class documentFormatter:
                 except KeyError:
                     formattedRefs.append("MISSING: %s" % r)
                 else:
+                    print "THIS WAS C: %s" % c
                     formattedRefs.append("%s" % self.references.inTextCitation(r))
+
             if len(refs) > 1:
                 print "FR: %s" % formattedRefs
                 s = ", ".join(formattedRefs)
@@ -210,7 +263,8 @@ class documentFormatter:
 	# get the references from the database
         self.getReferences()
 	# replace the citekeys inside the document (handled by subclass)
-        self.replaceCitekeys()
+        if self.style != "unformatted":
+            self.replaceCitekeys()
 	# format the bibliography (handled by subclass)
         self.formatBibliography()
 	# write to file (handled by subclass)
@@ -274,15 +328,19 @@ class ooFormatter(documentFormatter):
         for k in self.inTextRefs.keys():
             p = re.compile(k)
             self.fileContents = p.sub(self.inTextRefs[k], self.fileContents)
+            #self.fileContents = p.sub('blah', self.fileContents)
+            
 
     def formatBibliography(self):
         self.formattedBibliography = r'<text:h text:style-name="Heading 1" text:level="1">References</text:h>'
         counter = 1
         for r in self.references:
 	    if self.style == "numbered":
-		self.formattedBibliography += "<text:p text:style-name=\"Standard\">[%s] %s</text:p>" % (counter , neurobiolDisease(r))
+		self.formattedBibliography += "<text:p text:style-name=\"Standard\">[%s] %s</text:p>" % (counter , currentFormat(r))
+            elif self.style == "unformatted":
+                self.formattedBibliography += "<text:p text:style-name=\"Standard\">[%s] %s</text:p>" % (r["citekey"], currentFormat(r))
 	    else:
-		self.formattedBibliography += "<text:p text:style-name=\"Standard\">%s</text:p>" % neurobiolDisease(r)
+		self.formattedBibliography += "<text:p text:style-name=\"Standard\">%s</text:p>" % currentFormat(r)
             counter += 1
 
         documentEnd = r'(</office:text>)?</office:body></office:document-content>'
@@ -298,6 +356,8 @@ if __name__ == "__main__":
 
     # command line options
     parser = OptionParser()
+    parser.add_option("--unformatted", action="store_const",
+                      const="unformatted", dest="style", default="numbered")
     parser.add_option("--numbered", action="store_const", 
 		      const="numbered", dest="style", default="numbered")
     parser.add_option("--parenthetical", action="store_const", 

@@ -25,10 +25,15 @@ class bibArray(list):
 
 	print "Formation style: %s" % self.inTextFormationStyle
 
-	if self.inTextFormationStyle == "parenthetical":
-	    self.inTextCitations[ref["citekey"]] = ref.inTextCitation()
-	elif self.inTextFormationStyle == "numbered":
-	    self.inTextCitations[ref["citekey"]] = self.counter
+        self.inTextCitations[ref["citekey"]] = 'hrmmmm'
+#	if self.inTextFormationStyle == "parenthetical":
+#	    self.inTextCitations[ref["citekey"]] = ref.inTextCitation()
+#	elif self.inTextFormationStyle == "numbered":
+#	    self.inTextCitations[ref["citekey"]] = self.counter
+#        elif self.inTextFormationStyle == "unformatted":
+#            self.inTextCitations[ref["citekey"]] = ref["citekey"]
+#        else:
+#            self.inTextCitations[ref["citekey"]] = ref.inTextCitation()
         self.counter += 1
 
     def removeCitekey(self, key):
